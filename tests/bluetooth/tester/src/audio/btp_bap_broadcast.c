@@ -36,15 +36,14 @@ static struct btp_bap_broadcast_remote_source *broadcast_source_to_sync;
 /* A mask for the maximum BIS we can sync to. +1 since the BIS indexes start from 1. */
 static const uint32_t bis_index_mask = BIT_MASK(CONFIG_BT_BAP_BROADCAST_SNK_STREAM_COUNT + 1);
 #define PA_SYNC_INTERVAL_TO_TIMEOUT_RATIO 20 /* Set the timeout relative to interval */
-#define PA_SYNC_SKIP              5
-static struct bt_bap_bass_subgroup
-	delegator_subgroups[CONFIG_BT_BAP_BASS_MAX_SUBGROUPS];
+#define PA_SYNC_SKIP                      5
+static struct bt_bap_bass_subgroup delegator_subgroups[CONFIG_BT_BAP_BASS_MAX_SUBGROUPS];
 
 static inline struct btp_bap_broadcast_stream *stream_bap_to_broadcast(struct bt_bap_stream *stream)
 {
 	return CONTAINER_OF(CONTAINER_OF(CONTAINER_OF(stream, struct bt_cap_stream, bap_stream),
-		struct btp_bap_audio_stream, cap_stream), struct btp_bap_broadcast_stream,
-		audio_stream);
+					 struct btp_bap_audio_stream, cap_stream),
+			    struct btp_bap_broadcast_stream, audio_stream);
 }
 
 static inline struct bt_bap_stream *stream_broadcast_to_bap(struct btp_bap_broadcast_stream *stream)
@@ -55,7 +54,7 @@ static inline struct bt_bap_stream *stream_broadcast_to_bap(struct btp_bap_broad
 struct btp_bap_broadcast_local_source *btp_bap_broadcast_local_source_get(uint8_t source_id)
 {
 	/* Only one local broadcast source supported for now */
-	(void) source_id;
+	(void)source_id;
 
 	return &local_source;
 }
@@ -74,7 +73,7 @@ static struct btp_bap_broadcast_remote_source *remote_broadcaster_alloc(void)
 }
 
 static struct btp_bap_broadcast_remote_source *remote_broadcaster_find(const bt_addr_le_t *addr,
-							       uint32_t broadcast_id)
+								       uint32_t broadcast_id)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(remote_broadcast_sources); i++) {
 		struct btp_bap_broadcast_remote_source *broadcaster = &remote_broadcast_sources[i];
@@ -88,8 +87,8 @@ static struct btp_bap_broadcast_remote_source *remote_broadcaster_find(const bt_
 	return NULL;
 }
 
-static struct btp_bap_broadcast_remote_source *remote_broadcaster_find_by_sink(
-	struct bt_bap_broadcast_sink *sink)
+static struct btp_bap_broadcast_remote_source *
+remote_broadcaster_find_by_sink(struct bt_bap_broadcast_sink *sink)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(remote_broadcast_sources); i++) {
 		struct btp_bap_broadcast_remote_source *broadcaster = &remote_broadcast_sources[i];
@@ -177,8 +176,7 @@ static void send_bis_stream_received_ev(const bt_addr_le_t *address, uint32_t br
 	tester_rsp_buffer_unlock();
 }
 
-static void stream_recv(struct bt_bap_stream *stream,
-			const struct bt_iso_recv_info *info,
+static void stream_recv(struct bt_bap_stream *stream, const struct bt_iso_recv_info *info,
 			struct net_buf *buf)
 {
 	struct btp_bap_broadcast_remote_source *broadcaster;
@@ -208,8 +206,8 @@ static struct bt_bap_stream_ops stream_ops = {
 	.sent = btp_bap_audio_stream_sent_cb,
 };
 
-struct btp_bap_broadcast_stream *btp_bap_broadcast_stream_alloc(
-	struct btp_bap_broadcast_local_source *source)
+struct btp_bap_broadcast_stream *
+btp_bap_broadcast_stream_alloc(struct btp_bap_broadcast_local_source *source)
 {
 	for (size_t i = 0; i < ARRAY_SIZE(source->streams); i++) {
 		struct btp_bap_broadcast_stream *stream = &source->streams[i];
@@ -237,7 +235,7 @@ static void remote_broadcaster_free(struct btp_bap_broadcast_remote_source *broa
 	}
 }
 
-static int setup_broadcast_source(uint8_t streams_per_subgroup,	uint8_t subgroups,
+static int setup_broadcast_source(uint8_t streams_per_subgroup, uint8_t subgroups,
 				  struct btp_bap_broadcast_local_source *source,
 				  struct bt_audio_codec_cfg *codec_cfg)
 {
@@ -249,7 +247,7 @@ static int setup_broadcast_source(uint8_t streams_per_subgroup,	uint8_t subgroup
 	struct bt_bap_broadcast_source_param create_param;
 
 	if (streams_per_subgroup * subgroups > CONFIG_BT_BAP_BROADCAST_SRC_STREAM_COUNT ||
-	    subgroups >	CONFIG_BT_BAP_BROADCAST_SRC_SUBGROUP_COUNT) {
+	    subgroups > CONFIG_BT_BAP_BROADCAST_SRC_SUBGROUP_COUNT) {
 		return -EINVAL;
 	}
 
@@ -282,20 +280,18 @@ static int setup_broadcast_source(uint8_t streams_per_subgroup,	uint8_t subgroup
 	create_param.encryption = false;
 	create_param.packing = BT_ISO_PACKING_SEQUENTIAL;
 
-	LOG_DBG("Creating broadcast source with %zu subgroups with %zu streams",
-		subgroups, subgroups * streams_per_subgroup);
+	LOG_DBG("Creating broadcast source with %zu subgroups with %zu streams", subgroups,
+		subgroups * streams_per_subgroup);
 
 	if (source->bap_broadcast == NULL) {
-		err = bt_bap_broadcast_source_create(&create_param,
-						     &source->bap_broadcast);
+		err = bt_bap_broadcast_source_create(&create_param, &source->bap_broadcast);
 		if (err != 0) {
 			LOG_DBG("Unable to create broadcast source: %d", err);
 
 			return err;
 		}
 	} else {
-		err = bt_bap_broadcast_source_reconfig(source->bap_broadcast,
-						       &create_param);
+		err = bt_bap_broadcast_source_reconfig(source->bap_broadcast, &create_param);
 		if (err != 0) {
 			LOG_DBG("Unable to reconfig broadcast source: %d", err);
 
@@ -306,8 +302,8 @@ static int setup_broadcast_source(uint8_t streams_per_subgroup,	uint8_t subgroup
 	return 0;
 }
 
-uint8_t btp_bap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
-				       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_source_setup(const void *cmd, uint16_t cmd_len, void *rsp,
+				       uint16_t *rsp_len)
 {
 	struct bt_le_per_adv_param per_adv_param =
 		*BT_LE_PER_ADV_PARAM(BT_GAP_MS_TO_PER_ADV_INTERVAL(150),
@@ -329,8 +325,8 @@ uint8_t btp_bap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
 	/* Only one local source/BIG supported for now */
 	struct btp_bap_broadcast_local_source *source = &local_source;
 
-	uint32_t gap_settings = BIT(BTP_GAP_SETTINGS_DISCOVERABLE) |
-				BIT(BTP_GAP_SETTINGS_EXTENDED_ADVERTISING);
+	uint32_t gap_settings =
+		BIT(BTP_GAP_SETTINGS_DISCOVERABLE) | BIT(BTP_GAP_SETTINGS_EXTENDED_ADVERTISING);
 
 	NET_BUF_SIMPLE_DEFINE(ad_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 	NET_BUF_SIMPLE_DEFINE(base_buf, 128);
@@ -371,6 +367,10 @@ uint8_t btp_bap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
 
 		return BTP_STATUS_FAILED;
 	}
+
+	LOG_WRN("Setting broadcast ID to 0x123456");
+
+	broadcast_id = 0x123456;
 
 	/* Setup extended advertising data */
 	net_buf_simple_add_le16(&ad_buf, BT_UUID_BROADCAST_AUDIO_VAL);
@@ -418,8 +418,8 @@ uint8_t btp_bap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_source_release(const void *cmd, uint16_t cmd_len,
-					 void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_source_release(const void *cmd, uint16_t cmd_len, void *rsp,
+					 uint16_t *rsp_len)
 {
 	int err;
 	struct btp_bap_broadcast_local_source *source = &local_source;
@@ -438,8 +438,7 @@ uint8_t btp_bap_broadcast_source_release(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_adv_start(const void *cmd, uint16_t cmd_len,
-				    void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_adv_start(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	int err;
 	struct bt_le_ext_adv *ext_adv = tester_gap_ext_adv_get();
@@ -465,8 +464,7 @@ uint8_t btp_bap_broadcast_adv_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len,
-				   void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	int err;
 
@@ -482,8 +480,8 @@ uint8_t btp_bap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_source_start(const void *cmd, uint16_t cmd_len,
-				       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_source_start(const void *cmd, uint16_t cmd_len, void *rsp,
+				       uint16_t *rsp_len)
 {
 	int err;
 	struct btp_bap_broadcast_local_source *source = &local_source;
@@ -505,8 +503,8 @@ uint8_t btp_bap_broadcast_source_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_source_stop(const void *cmd, uint16_t cmd_len,
-				      void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_source_stop(const void *cmd, uint16_t cmd_len, void *rsp,
+				      uint16_t *rsp_len)
 {
 	int err;
 	struct btp_bap_broadcast_local_source *source = &local_source;
@@ -543,8 +541,8 @@ static int broadcast_sink_reset(void)
 	return 0;
 }
 
-static void btp_send_baa_found_ev(const bt_addr_le_t *address, uint32_t broadcast_id,
-				  uint8_t sid, uint16_t interval)
+static void btp_send_baa_found_ev(const bt_addr_le_t *address, uint32_t broadcast_id, uint8_t sid,
+				  uint16_t interval)
 {
 	struct btp_bap_baa_found_ev ev;
 
@@ -585,8 +583,8 @@ static bool baa_check(struct bt_data *data, void *user_data)
 
 	bt_addr_le_to_str(info->addr, le_addr, sizeof(le_addr));
 
-	LOG_DBG("Found BAA with ID 0x%06X, addr %s, sid 0x%02X, interval 0x%04X",
-		broadcast_id, le_addr, info->sid, info->interval);
+	LOG_DBG("Found BAA with ID 0x%06X, addr %s, sid 0x%02X, interval 0x%04X", broadcast_id,
+		le_addr, info->sid, info->interval);
 
 	btp_send_baa_found_ev(info->addr, broadcast_id, info->sid, info->interval);
 
@@ -627,8 +625,7 @@ static void btp_send_bis_found_ev(const bt_addr_le_t *address, uint32_t broadcas
 	ev->cc_ltvs_len = codec_cfg->data_len;
 	memcpy(ev->cc_ltvs, codec_cfg->data, ev->cc_ltvs_len);
 
-	tester_event(BTP_SERVICE_ID_BAP, BTP_BAP_EV_BIS_FOUND, ev,
-		     sizeof(*ev) + ev->cc_ltvs_len);
+	tester_event(BTP_SERVICE_ID_BAP, BTP_BAP_EV_BIS_FOUND, ev, sizeof(*ev) + ev->cc_ltvs_len);
 
 	tester_rsp_buffer_free();
 	tester_rsp_buffer_unlock();
@@ -701,8 +698,8 @@ static void base_recv_cb(struct bt_bap_broadcast_sink *sink, const struct bt_bap
 		return;
 	}
 
-	LOG_DBG("Received BASE: broadcast sink %p subgroups %u",
-		sink, bt_bap_base_get_subgroup_count(base));
+	LOG_DBG("Received BASE: broadcast sink %p subgroups %u", sink,
+		bt_bap_base_get_subgroup_count(base));
 
 	ret = bt_bap_base_get_pres_delay(base);
 	if (ret < 0) {
@@ -820,9 +817,8 @@ static struct bt_le_per_adv_sync_cb bap_pa_sync_cb = {
 	.synced = bap_pa_sync_synced_cb,
 };
 
-static void btp_send_pas_sync_req_ev(struct bt_conn *conn, uint8_t src_id,
-				     uint8_t advertiser_sid, uint32_t broadcast_id,
-				     bool past_avail, uint16_t pa_interval)
+static void btp_send_pas_sync_req_ev(struct bt_conn *conn, uint8_t src_id, uint8_t advertiser_sid,
+				     uint32_t broadcast_id, bool past_avail, uint16_t pa_interval)
 {
 	struct btp_bap_pa_sync_req_ev ev;
 
@@ -845,8 +841,9 @@ static void btp_send_scan_delegator_found_ev(struct bt_conn *conn)
 	tester_event(BTP_SERVICE_ID_BAP, BTP_BAP_EV_SCAN_DELEGATOR_FOUND, &ev, sizeof(ev));
 }
 
-static void btp_send_broadcast_receive_state_ev(struct bt_conn *conn,
-	const struct bt_bap_scan_delegator_recv_state *state)
+static void
+btp_send_broadcast_receive_state_ev(struct bt_conn *conn,
+				    const struct bt_bap_scan_delegator_recv_state *state)
 {
 	struct btp_bap_broadcast_receive_state_ev *ev;
 	size_t len;
@@ -854,7 +851,8 @@ static void btp_send_broadcast_receive_state_ev(struct bt_conn *conn,
 
 	tester_rsp_buffer_lock();
 	tester_rsp_buffer_allocate(sizeof(*ev) + CONFIG_BT_BAP_BASS_MAX_SUBGROUPS *
-		sizeof(struct bt_bap_bass_subgroup), (uint8_t **)&ev);
+							 sizeof(struct bt_bap_bass_subgroup),
+				   (uint8_t **)&ev);
 
 	if (conn) {
 		bt_addr_le_copy(&ev->address, bt_conn_get_dst(conn));
@@ -891,7 +889,7 @@ static void btp_send_broadcast_receive_state_ev(struct bt_conn *conn,
 
 static int pa_sync_past(struct bt_conn *conn, uint16_t sync_timeout)
 {
-	struct bt_le_per_adv_sync_transfer_param param = { 0 };
+	struct bt_le_per_adv_sync_transfer_param param = {0};
 	int err;
 
 	param.skip = PA_SYNC_SKIP;
@@ -1059,8 +1057,8 @@ static struct bt_bap_scan_delegator_cb scan_delegator_cbs = {
 	.bis_sync_req = bis_sync_req_cb,
 };
 
-uint8_t btp_bap_broadcast_sink_setup(const void *cmd, uint16_t cmd_len,
-				     void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_sink_setup(const void *cmd, uint16_t cmd_len, void *rsp,
+				     uint16_t *rsp_len)
 {
 	int err;
 
@@ -1087,8 +1085,8 @@ uint8_t btp_bap_broadcast_sink_setup(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_sink_release(const void *cmd, uint16_t cmd_len,
-				       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_sink_release(const void *cmd, uint16_t cmd_len, void *rsp,
+				       uint16_t *rsp_len)
 {
 	int err;
 
@@ -1099,8 +1097,8 @@ uint8_t btp_bap_broadcast_sink_release(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_scan_start(const void *cmd, uint16_t cmd_len,
-				     void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_scan_start(const void *cmd, uint16_t cmd_len, void *rsp,
+				     uint16_t *rsp_len)
 {
 	int err;
 
@@ -1116,8 +1114,7 @@ uint8_t btp_bap_broadcast_scan_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_scan_stop(const void *cmd, uint16_t cmd_len,
-				    void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_scan_stop(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	int err;
 
@@ -1133,8 +1130,7 @@ uint8_t btp_bap_broadcast_scan_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_sink_sync(const void *cmd, uint16_t cmd_len,
-				    void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_sink_sync(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1198,8 +1194,7 @@ uint8_t btp_bap_broadcast_sink_sync(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_sink_stop(const void *cmd, uint16_t cmd_len,
-				    void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_sink_stop(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	int err;
 	struct btp_bap_broadcast_remote_source *broadcaster;
@@ -1234,8 +1229,8 @@ uint8_t btp_bap_broadcast_sink_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_sink_bis_sync(const void *cmd, uint16_t cmd_len,
-					void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_sink_bis_sync(const void *cmd, uint16_t cmd_len, void *rsp,
+					uint16_t *rsp_len)
 {
 	int err;
 	struct btp_bap_broadcast_remote_source *broadcaster;
@@ -1290,8 +1285,9 @@ static void bap_broadcast_assistant_scan_cb(const struct bt_le_scan_recv_info *i
 		info->interval, info->sid, info->rssi);
 }
 
-static void bap_broadcast_assistant_recv_state_cb(struct bt_conn *conn, int err,
-	const struct bt_bap_scan_delegator_recv_state *state)
+static void
+bap_broadcast_assistant_recv_state_cb(struct bt_conn *conn, int err,
+				      const struct bt_bap_scan_delegator_recv_state *state)
 {
 	LOG_DBG("err: %d", err);
 
@@ -1350,8 +1346,8 @@ static struct bt_bap_broadcast_assistant_cb broadcast_assistant_cb = {
 	.rem_src = bap_broadcast_assistant_rem_src_cb,
 };
 
-uint8_t btp_bap_broadcast_discover_scan_delegators(const void *cmd, uint16_t cmd_len,
-						   void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_discover_scan_delegators(const void *cmd, uint16_t cmd_len, void *rsp,
+						   uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1369,8 +1365,8 @@ uint8_t btp_bap_broadcast_discover_scan_delegators(const void *cmd, uint16_t cmd
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_assistant_scan_start(const void *cmd, uint16_t cmd_len,
-					       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_scan_start(const void *cmd, uint16_t cmd_len, void *rsp,
+					       uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1388,8 +1384,8 @@ uint8_t btp_bap_broadcast_assistant_scan_start(const void *cmd, uint16_t cmd_len
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_assistant_scan_stop(const void *cmd, uint16_t cmd_len,
-					      void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_scan_stop(const void *cmd, uint16_t cmd_len, void *rsp,
+					      uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1407,14 +1403,14 @@ uint8_t btp_bap_broadcast_assistant_scan_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_assistant_add_src(const void *cmd, uint16_t cmd_len,
-					    void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_add_src(const void *cmd, uint16_t cmd_len, void *rsp,
+					    uint16_t *rsp_len)
 {
 	int err;
 	const uint8_t *ptr;
 	struct bt_conn *conn;
 	const struct btp_bap_add_broadcast_src_cmd *cp = cmd;
-	struct bt_bap_broadcast_assistant_add_src_param param = { 0 };
+	struct bt_bap_broadcast_assistant_add_src_param param = {0};
 
 	LOG_DBG("");
 
@@ -1461,8 +1457,8 @@ uint8_t btp_bap_broadcast_assistant_add_src(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_assistant_remove_src(const void *cmd, uint16_t cmd_len,
-					       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_remove_src(const void *cmd, uint16_t cmd_len, void *rsp,
+					       uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1480,14 +1476,14 @@ uint8_t btp_bap_broadcast_assistant_remove_src(const void *cmd, uint16_t cmd_len
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_assistant_modify_src(const void *cmd, uint16_t cmd_len,
-					       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_modify_src(const void *cmd, uint16_t cmd_len, void *rsp,
+					       uint16_t *rsp_len)
 {
 	int err;
 	const uint8_t *ptr;
 	struct bt_conn *conn;
 	const struct btp_bap_modify_broadcast_src_cmd *cp = cmd;
-	struct bt_bap_broadcast_assistant_mod_src_param param = { 0 };
+	struct bt_bap_broadcast_assistant_mod_src_param param = {0};
 
 	LOG_DBG("");
 
@@ -1527,8 +1523,8 @@ uint8_t btp_bap_broadcast_assistant_modify_src(const void *cmd, uint16_t cmd_len
 	return BTP_STATUS_VAL(err);
 }
 
-uint8_t btp_bap_broadcast_assistant_set_broadcast_code(const void *cmd, uint16_t cmd_len,
-						       void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_set_broadcast_code(const void *cmd, uint16_t cmd_len, void *rsp,
+						       uint16_t *rsp_len)
 {
 	int err;
 	struct bt_conn *conn;
@@ -1550,8 +1546,8 @@ uint8_t btp_bap_broadcast_assistant_set_broadcast_code(const void *cmd, uint16_t
 	return BTP_STATUS_SUCCESS;
 }
 
-uint8_t btp_bap_broadcast_assistant_send_past(const void *cmd, uint16_t cmd_len,
-					      void *rsp, uint16_t *rsp_len)
+uint8_t btp_bap_broadcast_assistant_send_past(const void *cmd, uint16_t cmd_len, void *rsp,
+					      uint16_t *rsp_len)
 {
 	int err;
 	uint16_t service_data;

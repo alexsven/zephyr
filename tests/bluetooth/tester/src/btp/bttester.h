@@ -45,12 +45,10 @@ struct btp_handler {
 	uint8_t opcode;
 	uint8_t index;
 	ssize_t expect_len;
-	uint8_t (*func)(const void *cmd, uint16_t cmd_len,
-			void *rsp, uint16_t *rsp_len);
+	uint8_t (*func)(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len);
 };
 
-void tester_register_command_handlers(uint8_t service,
-				      const struct btp_handler *handlers,
+void tester_register_command_handlers(uint8_t service, const struct btp_handler *handlers,
 				      size_t num);
 
 uint8_t tester_init_gatt(void);
@@ -138,3 +136,6 @@ uint8_t tester_unregister_tmap(void);
 
 uint8_t tester_init_ots(void);
 uint8_t tester_unregister_ots(void);
+
+uint8_t tester_init_pbp(void);
+uint8_t tester_unregister_pbp(void);

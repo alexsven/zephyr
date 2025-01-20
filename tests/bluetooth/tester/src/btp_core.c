@@ -30,8 +30,7 @@ LOG_MODULE_REGISTER(LOG_MODULE_NAME, CONFIG_BTTESTER_LOG_LEVEL);
 
 static ATOMIC_DEFINE(registered_services, BTP_SERVICE_ID_MAX);
 
-static uint8_t supported_commands(const void *cmd, uint16_t cmd_len,
-				  void *rsp, uint16_t *rsp_len)
+static uint8_t supported_commands(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	struct btp_core_read_supported_commands_rp *rp = rsp;
 
@@ -45,8 +44,7 @@ static uint8_t supported_commands(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t supported_services(const void *cmd, uint16_t cmd_len,
-				  void *rsp, uint16_t *rsp_len)
+static uint8_t supported_services(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	struct btp_core_read_supported_services_rp *rp = rsp;
 
@@ -107,14 +105,16 @@ static uint8_t supported_services(const void *cmd, uint16_t cmd_len,
 #if defined(CONFIG_BT_TMAP)
 	tester_set_bit(rp->data, BTP_SERVICE_ID_TMAP);
 #endif /* CONFIG_BT_TMAP */
+#if defined(CONFIG_BT_PBP)
+	tester_set_bit(rp->data, BTP_SERVICE_ID_PBP);
+#endif /* CONFIG_BT_PBP */
 
 	*rsp_len = sizeof(*rp) + 2;
 
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t register_service(const void *cmd, uint16_t cmd_len,
-				void *rsp, uint16_t *rsp_len)
+static uint8_t register_service(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	const struct btp_core_register_service_cmd *cp = cmd;
 	uint8_t status;
@@ -168,7 +168,7 @@ static uint8_t register_service(const void *cmd, uint16_t cmd_len,
 		status = tester_init_ias();
 		break;
 #endif /* CONFIG_BT_IAS */
-#if defined(CONFIG_BT_BAP_UNICAST_CLIENT) || defined(CONFIG_BT_BAP_UNICAST_SERVER) || \
+#if defined(CONFIG_BT_BAP_UNICAST_CLIENT) || defined(CONFIG_BT_BAP_UNICAST_SERVER) ||              \
 	defined(CONFIG_BT_BAP_BROADCAST_SOURCE) || defined(CONFIG_BT_BAP_BROADCAST_SINK)
 	case BTP_SERVICE_ID_PACS:
 		status = tester_init_pacs();
@@ -179,8 +179,8 @@ static uint8_t register_service(const void *cmd, uint16_t cmd_len,
 	case BTP_SERVICE_ID_BAP:
 		status = tester_init_bap();
 		break;
-#endif /* CONFIG_BT_BAP_UNICAST_CLIENT || CONFIG_BT_BAP_UNICAST_SERVER || \
-	* CONFIG_BT_BAP_BROADCAST_SOURCE || CONFIG_BT_BAP_BROADCAST_SINK
+#endif /* CONFIG_BT_BAP_UNICAST_CLIENT || CONFIG_BT_BAP_UNICAST_SERVER ||                          \
+	* CONFIG_BT_BAP_BROADCAST_SOURCE || CONFIG_BT_BAP_BROADCAST_SINK                           \
 	*/
 #if defined(CONFIG_BT_MICP_MIC_DEV) || defined(CONFIG_BT_MICP_MIC_CTLR)
 	case BTP_SERVICE_ID_MICP:
@@ -250,6 +250,11 @@ static uint8_t register_service(const void *cmd, uint16_t cmd_len,
 		status = tester_init_ots();
 		break;
 #endif /* CONFIG_BT_OTS */
+#if defined(CONFIG_BT_PBP)
+	case BTP_SERVICE_ID_PBP:
+		status = tester_init_pbp();
+		break;
+#endif /* CONFIG_BT_PBP */
 	default:
 		LOG_WRN("unknown id: 0x%02x", cp->id);
 		status = BTP_STATUS_FAILED;
@@ -263,8 +268,7 @@ static uint8_t register_service(const void *cmd, uint16_t cmd_len,
 	return status;
 }
 
-static uint8_t unregister_service(const void *cmd, uint16_t cmd_len,
-				  void *rsp, uint16_t *rsp_len)
+static uint8_t unregister_service(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	const struct btp_core_unregister_service_cmd *cp = cmd;
 	uint8_t status;
@@ -315,7 +319,7 @@ static uint8_t unregister_service(const void *cmd, uint16_t cmd_len,
 		status = tester_unregister_ias();
 		break;
 #endif /* CONFIG_BT_IAS */
-#if defined(CONFIG_BT_BAP_UNICAST_CLIENT) || defined(CONFIG_BT_BAP_UNICAST_SERVER) || \
+#if defined(CONFIG_BT_BAP_UNICAST_CLIENT) || defined(CONFIG_BT_BAP_UNICAST_SERVER) ||              \
 	defined(CONFIG_BT_BAP_BROADCAST_SOURCE) || defined(CONFIG_BT_BAP_BROADCAST_SINK)
 	case BTP_SERVICE_ID_PACS:
 		status = tester_unregister_pacs();
@@ -326,8 +330,8 @@ static uint8_t unregister_service(const void *cmd, uint16_t cmd_len,
 	case BTP_SERVICE_ID_BAP:
 		status = tester_unregister_bap();
 		break;
-#endif /* CONFIG_BT_BAP_UNICAST_CLIENT || CONFIG_BT_BAP_UNICAST_SERVER || \
-	* CONFIG_BT_BAP_BROADCAST_SOURCE || CONFIG_BT_BAP_BROADCAST_SINK
+#endif /* CONFIG_BT_BAP_UNICAST_CLIENT || CONFIG_BT_BAP_UNICAST_SERVER ||                          \
+	* CONFIG_BT_BAP_BROADCAST_SOURCE || CONFIG_BT_BAP_BROADCAST_SINK                           \
 	*/
 #if defined(CONFIG_BT_MICP_MIC_DEV) || defined(CONFIG_BT_MICP_MIC_CTLR)
 	case BTP_SERVICE_ID_MICP:
@@ -397,6 +401,11 @@ static uint8_t unregister_service(const void *cmd, uint16_t cmd_len,
 		status = tester_unregister_ots();
 		break;
 #endif /* CONFIG_BT_OTS */
+#if defined(CONFIG_BT_PBP)
+	case BTP_SERVICE_ID_PBP:
+		status = tester_unregister_pbp();
+		break;
+#endif /* CONFIG_BT_PBP */
 	default:
 		LOG_WRN("unknown id: 0x%x", cp->id);
 		status = BTP_STATUS_FAILED;
@@ -439,7 +448,6 @@ static const struct btp_handler handlers[] = {
 
 void tester_init_core(void)
 {
-	tester_register_command_handlers(BTP_SERVICE_ID_CORE, handlers,
-					 ARRAY_SIZE(handlers));
+	tester_register_command_handlers(BTP_SERVICE_ID_CORE, handlers, ARRAY_SIZE(handlers));
 	atomic_set_bit(registered_services, BTP_SERVICE_ID_CORE);
 }

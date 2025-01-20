@@ -146,8 +146,8 @@ static struct bt_cap_initiator_cb cap_cb = {
 	.unicast_stop_complete = unicast_stop_complete_cb,
 };
 
-static uint8_t btp_cap_supported_commands(const void *cmd, uint16_t cmd_len,
-					  void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_supported_commands(const void *cmd, uint16_t cmd_len, void *rsp,
+					  uint16_t *rsp_len)
 {
 	struct btp_cap_read_supported_commands_rp *rp = rsp;
 
@@ -160,8 +160,7 @@ static uint8_t btp_cap_supported_commands(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_discover(const void *cmd, uint16_t cmd_len,
-				void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_discover(const void *cmd, uint16_t cmd_len, void *rsp, uint16_t *rsp_len)
 {
 	const struct btp_cap_discover_cmd *cp = cmd;
 	struct bt_conn *conn;
@@ -227,8 +226,8 @@ static int cap_unicast_setup_ase(struct bt_conn *conn, uint8_t ase_id, uint8_t c
 	return 0;
 }
 
-static uint8_t btp_cap_unicast_setup_ase(const void *cmd, uint16_t cmd_len,
-					 void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_unicast_setup_ase(const void *cmd, uint16_t cmd_len, void *rsp,
+					 uint16_t *rsp_len)
 {
 	const struct btp_cap_unicast_setup_ase_cmd *cp = cmd;
 	struct bt_audio_codec_cfg codec_cfg;
@@ -278,15 +277,15 @@ static uint8_t btp_cap_unicast_setup_ase(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_VAL(err);
 }
 
-static uint8_t btp_cap_unicast_audio_start(const void *cmd, uint16_t cmd_len,
-					   void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_unicast_audio_start(const void *cmd, uint16_t cmd_len, void *rsp,
+					   uint16_t *rsp_len)
 {
 	int err;
 	size_t stream_count = 0;
 	const struct btp_cap_unicast_audio_start_cmd *cp = cmd;
 	struct bt_cap_unicast_audio_start_param start_param;
-	struct bt_cap_unicast_audio_start_stream_param stream_params[
-		ARRAY_SIZE(btp_csip_set_members) * BTP_BAP_UNICAST_MAX_STREAMS_COUNT];
+	struct bt_cap_unicast_audio_start_stream_param
+		stream_params[ARRAY_SIZE(btp_csip_set_members) * BTP_BAP_UNICAST_MAX_STREAMS_COUNT];
 
 	LOG_DBG("");
 
@@ -316,8 +315,8 @@ static uint8_t btp_cap_unicast_audio_start(const void *cmd, uint16_t cmd_len,
 			stream_param = &stream_params[stream_count++];
 			stream_param->stream = stream_unicast_to_cap(u_stream);
 			stream_param->codec_cfg = &u_stream->codec_cfg;
-			stream_param->member.member = bt_conn_lookup_addr_le(BT_ID_DEFAULT,
-									     &u_conn->address);
+			stream_param->member.member =
+				bt_conn_lookup_addr_le(BT_ID_DEFAULT, &u_conn->address);
 			stream_param->ep = btp_bap_unicast_end_point_find(u_conn, u_stream->ase_id);
 		}
 	}
@@ -336,8 +335,8 @@ static uint8_t btp_cap_unicast_audio_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_unicast_audio_update(const void *cmd, uint16_t cmd_len,
-					    void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_unicast_audio_update(const void *cmd, uint16_t cmd_len, void *rsp,
+					    uint16_t *rsp_len)
 {
 	int err;
 	const uint8_t *data_ptr;
@@ -403,8 +402,8 @@ static uint8_t btp_cap_unicast_audio_update(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_unicast_audio_stop(const void *cmd, uint16_t cmd_len,
-					  void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_unicast_audio_stop(const void *cmd, uint16_t cmd_len, void *rsp,
+					  uint16_t *rsp_len)
 {
 	struct bt_cap_stream
 		*streams[ARRAY_SIZE(btp_csip_set_members) * BTP_BAP_UNICAST_MAX_STREAMS_COUNT];
@@ -454,10 +453,10 @@ static struct bt_cap_initiator_broadcast_subgroup_param
 	cap_subgroup_params[CONFIG_BT_BAP_BROADCAST_SRC_SUBGROUP_COUNT];
 static struct bt_cap_initiator_broadcast_stream_param
 	cap_stream_params[CONFIG_BT_BAP_BROADCAST_SRC_SUBGROUP_COUNT]
-		     [CONFIG_BT_BAP_BROADCAST_SRC_STREAM_COUNT];
+			 [CONFIG_BT_BAP_BROADCAST_SRC_STREAM_COUNT];
 
-static uint8_t btp_cap_broadcast_source_setup_stream(const void *cmd, uint16_t cmd_len,
-						     void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_setup_stream(const void *cmd, uint16_t cmd_len, void *rsp,
+						     uint16_t *rsp_len)
 {
 	const uint8_t *ltv_ptr;
 	struct btp_bap_broadcast_stream *stream;
@@ -493,8 +492,8 @@ static uint8_t btp_cap_broadcast_source_setup_stream(const void *cmd, uint16_t c
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_source_setup_subgroup(const void *cmd, uint16_t cmd_len,
-						       void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_setup_subgroup(const void *cmd, uint16_t cmd_len, void *rsp,
+						       uint16_t *rsp_len)
 {
 	const uint8_t *ltv_ptr;
 	struct bt_audio_codec_cfg *codec_cfg;
@@ -534,7 +533,6 @@ static int cap_broadcast_source_adv_setup(struct btp_bap_broadcast_local_source 
 {
 	int err;
 	struct bt_le_adv_param param = *BT_LE_EXT_ADV_NCONN;
-	uint32_t broadcast_id;
 
 	NET_BUF_SIMPLE_DEFINE(ad_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 	NET_BUF_SIMPLE_DEFINE(base_buf, 128);
@@ -543,15 +541,8 @@ static int cap_broadcast_source_adv_setup(struct btp_bap_broadcast_local_source 
 	struct bt_data base_ad[2];
 	struct bt_data per_ad;
 
-	err = bt_rand(&broadcast_id, BT_AUDIO_BROADCAST_ID_SIZE);
-	if (err) {
-		printk("Unable to generate broadcast ID: %d\n", err);
-
-		return -EINVAL;
-	}
-
-	*gap_settings = BIT(BTP_GAP_SETTINGS_DISCOVERABLE) |
-			BIT(BTP_GAP_SETTINGS_EXTENDED_ADVERTISING);
+	*gap_settings =
+		BIT(BTP_GAP_SETTINGS_DISCOVERABLE) | BIT(BTP_GAP_SETTINGS_EXTENDED_ADVERTISING);
 	/* Setup extended advertising data */
 	net_buf_simple_add_le16(&ad_buf, BT_UUID_BROADCAST_AUDIO_VAL);
 	net_buf_simple_add_le24(&ad_buf, source->broadcast_id);
@@ -561,13 +552,12 @@ static int cap_broadcast_source_adv_setup(struct btp_bap_broadcast_local_source 
 	base_ad[1].type = BT_DATA_NAME_COMPLETE;
 	base_ad[1].data_len = sizeof(CONFIG_BT_DEVICE_NAME) - 1;
 	base_ad[1].data = CONFIG_BT_DEVICE_NAME;
-	err = tester_gap_create_adv_instance(&param, BTP_GAP_ADDR_TYPE_IDENTITY, base_ad, 2, NULL,
-					     0, gap_settings);
-	if (err != 0) {
-		LOG_DBG("Failed to create extended advertising instance: %d", err);
+	// err = tester_gap_create_adv_instance(&param, BTP_GAP_ADDR_TYPE_IDENTITY, base_ad, 2,
+	// NULL, 				     0, gap_settings); if (err != 0) { 	LOG_DBG("Failed to create extended advertising
+	// instance: %d", err);
 
-		return -EINVAL;
-	}
+	// 	return -EINVAL;
+	// }
 
 	err = tester_gap_padv_configure(BT_LE_PER_ADV_PARAM(BT_GAP_PER_ADV_FAST_INT_MIN_2,
 							    BT_GAP_PER_ADV_FAST_INT_MAX_2,
@@ -596,8 +586,8 @@ static int cap_broadcast_source_adv_setup(struct btp_bap_broadcast_local_source 
 	return 0;
 }
 
-static uint8_t btp_cap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
-					      void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_setup(const void *cmd, uint16_t cmd_len, void *rsp,
+					      uint16_t *rsp_len)
 {
 	int err;
 	uint32_t gap_settings;
@@ -675,20 +665,22 @@ static uint8_t btp_cap_broadcast_source_setup(const void *cmd, uint16_t cmd_len,
 		return BTP_STATUS_FAILED;
 	}
 
-	err = cap_broadcast_source_adv_setup(source, &gap_settings);
-	if (err != 0) {
-		return BTP_STATUS_FAILED;
-	}
+	LOG_WRN("Broadcast_id: 0x%03x", *rp->broadcast_id);
 
 	rp->gap_settings = gap_settings;
 	sys_put_le24(source->broadcast_id, rp->broadcast_id);
 	*rsp_len = sizeof(*rp) + 1;
 
+	err = cap_broadcast_source_adv_setup(source, &gap_settings);
+	if (err != 0) {
+		return BTP_STATUS_FAILED;
+	}
+
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_source_release(const void *cmd, uint16_t cmd_len,
-						void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_release(const void *cmd, uint16_t cmd_len, void *rsp,
+						uint16_t *rsp_len)
 {
 	int err;
 	const struct btp_cap_broadcast_source_release_cmd *cp = cmd;
@@ -714,8 +706,8 @@ static uint8_t btp_cap_broadcast_source_release(const void *cmd, uint16_t cmd_le
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_adv_start(const void *cmd, uint16_t cmd_len,
-					   void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_adv_start(const void *cmd, uint16_t cmd_len, void *rsp,
+					   uint16_t *rsp_len)
 {
 	int err;
 	struct bt_le_ext_adv *ext_adv = tester_gap_ext_adv_get();
@@ -726,10 +718,10 @@ static uint8_t btp_cap_broadcast_adv_start(const void *cmd, uint16_t cmd_len,
 		return BTP_STATUS_FAILED;
 	}
 
-	err = tester_gap_start_ext_adv();
-	if (err != 0) {
-		return BTP_STATUS_FAILED;
-	}
+	// err = tester_gap_start_ext_adv();
+	// if (err != 0) {
+	// 	return BTP_STATUS_FAILED;
+	// }
 
 	err = tester_gap_padv_start();
 	if (err != 0) {
@@ -741,8 +733,8 @@ static uint8_t btp_cap_broadcast_adv_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len,
-					  void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len, void *rsp,
+					  uint16_t *rsp_len)
 {
 	int err;
 
@@ -762,8 +754,8 @@ static uint8_t btp_cap_broadcast_adv_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_VAL(err);
 }
 
-static uint8_t btp_cap_broadcast_source_start(const void *cmd, uint16_t cmd_len,
-					      void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_start(const void *cmd, uint16_t cmd_len, void *rsp,
+					      uint16_t *rsp_len)
 {
 	int err;
 	const struct btp_cap_broadcast_source_start_cmd *cp = cmd;
@@ -787,8 +779,8 @@ static uint8_t btp_cap_broadcast_source_start(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_source_stop(const void *cmd, uint16_t cmd_len,
-					     void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_stop(const void *cmd, uint16_t cmd_len, void *rsp,
+					     uint16_t *rsp_len)
 {
 	int err;
 	const struct btp_cap_broadcast_source_stop_cmd *cp = cmd;
@@ -810,8 +802,8 @@ static uint8_t btp_cap_broadcast_source_stop(const void *cmd, uint16_t cmd_len,
 	return BTP_STATUS_SUCCESS;
 }
 
-static uint8_t btp_cap_broadcast_source_update(const void *cmd, uint16_t cmd_len,
-					       void *rsp, uint16_t *rsp_len)
+static uint8_t btp_cap_broadcast_source_update(const void *cmd, uint16_t cmd_len, void *rsp,
+					       uint16_t *rsp_len)
 {
 	int err;
 	struct bt_data per_ad;
@@ -853,82 +845,52 @@ static uint8_t btp_cap_broadcast_source_update(const void *cmd, uint16_t cmd_len
 }
 
 static const struct btp_handler cap_handlers[] = {
-	{
-		.opcode = BTP_CAP_READ_SUPPORTED_COMMANDS,
-		.index = BTP_INDEX_NONE,
-		.expect_len = 0,
-		.func = btp_cap_supported_commands
-	},
-	{
-		.opcode = BTP_CAP_DISCOVER,
-		.expect_len = sizeof(struct btp_cap_discover_cmd),
-		.func = btp_cap_discover
-	},
-	{
-		.opcode = BTP_CAP_UNICAST_SETUP_ASE,
-		.expect_len = BTP_HANDLER_LENGTH_VARIABLE,
-		.func = btp_cap_unicast_setup_ase
-	},
-	{
-		.opcode = BTP_CAP_UNICAST_AUDIO_START,
-		.expect_len = sizeof(struct btp_cap_unicast_audio_start_cmd),
-		.func = btp_cap_unicast_audio_start
-	},
-	{
-		.opcode = BTP_CAP_UNICAST_AUDIO_UPDATE,
-		.expect_len = BTP_HANDLER_LENGTH_VARIABLE,
-		.func = btp_cap_unicast_audio_update
-	},
-	{
-		.opcode = BTP_CAP_UNICAST_AUDIO_STOP,
-		.expect_len = sizeof(struct btp_cap_unicast_audio_stop_cmd),
-		.func = btp_cap_unicast_audio_stop
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP_STREAM,
-		.expect_len = BTP_HANDLER_LENGTH_VARIABLE,
-		.func = btp_cap_broadcast_source_setup_stream
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP_SUBGROUP,
-		.expect_len = BTP_HANDLER_LENGTH_VARIABLE,
-		.func = btp_cap_broadcast_source_setup_subgroup
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP,
-		.expect_len = sizeof(struct btp_cap_broadcast_source_setup_cmd),
-		.func = btp_cap_broadcast_source_setup
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_RELEASE,
-		.expect_len = sizeof(struct btp_cap_broadcast_source_release_cmd),
-		.func = btp_cap_broadcast_source_release
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_ADV_START,
-		.expect_len = sizeof(struct btp_cap_broadcast_adv_start_cmd),
-		.func = btp_cap_broadcast_adv_start
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_ADV_STOP,
-		.expect_len = sizeof(struct btp_cap_broadcast_adv_stop_cmd),
-		.func = btp_cap_broadcast_adv_stop
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_START,
-		.expect_len = sizeof(struct btp_cap_broadcast_source_start_cmd),
-		.func = btp_cap_broadcast_source_start
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_STOP,
-		.expect_len = sizeof(struct btp_cap_broadcast_source_stop_cmd),
-		.func = btp_cap_broadcast_source_stop
-	},
-	{
-		.opcode = BTP_CAP_BROADCAST_SOURCE_UPDATE,
-		.expect_len = BTP_HANDLER_LENGTH_VARIABLE,
-		.func = btp_cap_broadcast_source_update
-	},
+	{.opcode = BTP_CAP_READ_SUPPORTED_COMMANDS,
+	 .index = BTP_INDEX_NONE,
+	 .expect_len = 0,
+	 .func = btp_cap_supported_commands},
+	{.opcode = BTP_CAP_DISCOVER,
+	 .expect_len = sizeof(struct btp_cap_discover_cmd),
+	 .func = btp_cap_discover},
+	{.opcode = BTP_CAP_UNICAST_SETUP_ASE,
+	 .expect_len = BTP_HANDLER_LENGTH_VARIABLE,
+	 .func = btp_cap_unicast_setup_ase},
+	{.opcode = BTP_CAP_UNICAST_AUDIO_START,
+	 .expect_len = sizeof(struct btp_cap_unicast_audio_start_cmd),
+	 .func = btp_cap_unicast_audio_start},
+	{.opcode = BTP_CAP_UNICAST_AUDIO_UPDATE,
+	 .expect_len = BTP_HANDLER_LENGTH_VARIABLE,
+	 .func = btp_cap_unicast_audio_update},
+	{.opcode = BTP_CAP_UNICAST_AUDIO_STOP,
+	 .expect_len = sizeof(struct btp_cap_unicast_audio_stop_cmd),
+	 .func = btp_cap_unicast_audio_stop},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP_STREAM,
+	 .expect_len = BTP_HANDLER_LENGTH_VARIABLE,
+	 .func = btp_cap_broadcast_source_setup_stream},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP_SUBGROUP,
+	 .expect_len = BTP_HANDLER_LENGTH_VARIABLE,
+	 .func = btp_cap_broadcast_source_setup_subgroup},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_SETUP,
+	 .expect_len = sizeof(struct btp_cap_broadcast_source_setup_cmd),
+	 .func = btp_cap_broadcast_source_setup},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_RELEASE,
+	 .expect_len = sizeof(struct btp_cap_broadcast_source_release_cmd),
+	 .func = btp_cap_broadcast_source_release},
+	{.opcode = BTP_CAP_BROADCAST_ADV_START,
+	 .expect_len = sizeof(struct btp_cap_broadcast_adv_start_cmd),
+	 .func = btp_cap_broadcast_adv_start},
+	{.opcode = BTP_CAP_BROADCAST_ADV_STOP,
+	 .expect_len = sizeof(struct btp_cap_broadcast_adv_stop_cmd),
+	 .func = btp_cap_broadcast_adv_stop},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_START,
+	 .expect_len = sizeof(struct btp_cap_broadcast_source_start_cmd),
+	 .func = btp_cap_broadcast_source_start},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_STOP,
+	 .expect_len = sizeof(struct btp_cap_broadcast_source_stop_cmd),
+	 .func = btp_cap_broadcast_source_stop},
+	{.opcode = BTP_CAP_BROADCAST_SOURCE_UPDATE,
+	 .expect_len = BTP_HANDLER_LENGTH_VARIABLE,
+	 .func = btp_cap_broadcast_source_update},
 };
 
 uint8_t tester_init_cap(void)
